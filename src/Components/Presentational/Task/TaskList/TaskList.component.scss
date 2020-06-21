@@ -1,0 +1,16 @@
+.task-list {
+    margin: 10px 0;
+    padding: 20px;
+    box-shadow: 0 3px 10px grey;
+    background-color: #f3f3f3;
+
+    .task-card{
+        border: 1px solid #c2c2c2;
+        padding: 10px;
+        background-color: white;
+    }
+
+    h5 {
+        display: inline-block;
+    }
+}
