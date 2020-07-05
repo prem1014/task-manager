@@ -14,7 +14,8 @@ describe('TaskList component test suite', () => {
         taskCardCreated: jest.fn(),
         onTaskCardDropped: jest.fn(),
         removeTask: jest.fn(),
-        removeTaskCard: jest.fn()
+        removeTaskCard: jest.fn(),
+        taskCardUpdated: jest.fn()
     }
 
     beforeEach( () => {

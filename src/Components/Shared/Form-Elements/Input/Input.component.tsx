@@ -9,14 +9,29 @@ interface IInputProps {
 }
 
 const Input: React.FC<IInputProps> = (props) => {
-    return (
-        <input 
+    let input = null;
+    switch(props.type) {
+        case 'textarea':
+            input = <textarea
+                onChange={props.changed}
+                placeholder={props.placeholder}
+                value={props.value}
+                className={props.className ? props.className : 'form-control'}
+            ></textarea>
+            break;
+        default:
+            input = <input
             type={props.type}
             onChange={props.changed}
             placeholder={props.placeholder}
             value={props.value}
             className={props.className ? props.className : 'form-control'}
         />
+        break;
+    }
+
+    return (
+        <>{input}</>
     )
 }
 

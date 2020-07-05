@@ -8,7 +8,8 @@ describe('TaskCardForm component test suite', () => {
     Enzyme.configure({ adapter: new Adapter() });
     let componentWrapper: any;
     const taskCardFormProps = {
-        taskCardCreated: jest.fn()
+        taskCardCreated: jest.fn(),
+        taskCardUpdated: jest.fn()
     }
 
     beforeEach( () => {

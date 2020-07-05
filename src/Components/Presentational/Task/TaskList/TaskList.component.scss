@@ -1,13 +1,15 @@
+@import '../../../../variable.scss';
+
 .task-list {
     margin: 10px 0;
     padding: 20px;
-    box-shadow: 0 3px 10px grey;
-    background-color: #f3f3f3;
+    box-shadow: 0 3px 10px $taskListBoxShadowColor;
+    background-color: $taskListBGColor;
 
     .task-card{
-        border: 1px solid #c2c2c2;
+        border: 1px solid $taskCardBorderColor;
         padding: 10px;
-        background-color: white;
+        background-color: $taskCardBGColor;
     }
 
     h5 {

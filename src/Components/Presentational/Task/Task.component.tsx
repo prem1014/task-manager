@@ -72,7 +72,7 @@ class Task extends Component<any, ITaskState> {
     }
 
     /* will be called when a task card is dragged and droppped */
-    onTaskCardDropped = (taskListId: number, cardId: number, draggedTotaskListId: number) => {
+    onTaskCardDropped = (taskListId: number, cardId: number, draggedTotaskListId: number, droppingItemId: number) => {
         let updatedState = { ...this.state };
 
         const indexOfTaskFromCardDragged: any = updatedState.tasks.findIndex( task => task.id === taskListId);
@@ -83,12 +83,40 @@ class Task extends Component<any, ITaskState> {
         const indexOfCardDraggedToTask = updatedState.tasks.findIndex( task => task.id === draggedTotaskListId);
         let taskCard: any = updatedState.tasks[indexOfCardDraggedToTask].taskCard;
         if(taskCard && taskCard.length > 0) {
-            taskCard.push(cardToBeDragged)
+            const droppingItemIndex = taskCard.findIndex( (card: any) => card.id === droppingItemId);
+            const itemToBeReplaced = taskCard[droppingItemIndex];
+            if(taskListId === draggedTotaskListId) {
+                if(droppingItemIndex < indexOfCardToBeDragged) {
+                    const card1 = taskCard.slice(0, droppingItemIndex);
+                    card1[card1.length] = cardToBeDragged;
+                    const elementToBeMoved = taskCard.slice(droppingItemIndex, taskCard.length);
+                    elementToBeMoved.splice(indexOfCardToBeDragged - droppingItemIndex, 1);
+                    taskCard = card1.concat(elementToBeMoved);
+                } else {
+                    if(droppingItemIndex + 1 === taskCard.length) {
+                        taskCard[droppingItemIndex] = cardToBeDragged;
+                        taskCard[indexOfCardToBeDragged] = itemToBeReplaced;
+                    } else {
+                        let card1 = taskCard.slice(droppingItemIndex + 1, taskCard.length);
+                        card1.unshift(cardToBeDragged);
+                        const elementToBeMoved = taskCard.slice(0, droppingItemIndex + 1);
+                        elementToBeMoved.splice(indexOfCardToBeDragged, 1);
+                        taskCard = elementToBeMoved.concat(card1);
+                    }
+                }
+            } else {
+                const card1 = taskCard.slice(0, droppingItemIndex);
+                card1[card1.length] = cardToBeDragged;
+                const elementToBeMoved = taskCard.slice(droppingItemIndex, taskCard.length);
+                taskCard = card1.concat(elementToBeMoved);
+            }
         } else {
             taskCard = [cardToBeDragged];
         }
         updatedState.tasks[indexOfCardDraggedToTask].taskCard = taskCard;
-        updatedState.tasks[indexOfTaskFromCardDragged].taskCard?.splice(indexOfCardToBeDragged, 1);
+        if(taskListId !== draggedTotaskListId) {
+            updatedState.tasks[indexOfTaskFromCardDragged].taskCard?.splice(indexOfCardToBeDragged, 1);
+        }
         this.setState(updatedState);
     }
 
@@ -111,6 +139,23 @@ class Task extends Component<any, ITaskState> {
         this.setState({enableTaskAdd: false});
     }
 
+    taskCardUpdated = (taskId: number, cardId: number, cardName: string) => {
+        let updatedState = { ...this.state };
+        updatedState.tasks = updatedState.tasks.map( task => {
+            if(task.id === taskId) {
+                task.taskCard = task.taskCard?.map( card => {
+                    if(card.id === cardId) {
+                        card.name = cardName;
+                    }
+                    return card;
+                });
+            }
+            return task;
+        });
+
+        this.setState(updatedState);
+    }
+
     render() {
         const { tasks, enableTaskAdd } = this.state;
         return (
@@ -126,7 +171,8 @@ class Task extends Component<any, ITaskState> {
                                     removeTask={(taskListId: number) => this.removeTask(taskListId)}
                                     removeTaskCard={(taskListId: number, cardId: number) => this.removeTaskCard(taskListId, cardId)}
                                     taskCardCreated={(taskListId: number, cardName: string) => this.taskCardCreated(taskListId, cardName)}
-                                    onTaskCardDropped={(taskListId: number, cardId: number, draggedTotaskListId: number) => this.onTaskCardDropped(taskListId, cardId, draggedTotaskListId)}
+                                    taskCardUpdated={(taskId: number, cardId: number, cardName: string) => this.taskCardUpdated(taskId, cardId, cardName)}
+                                    onTaskCardDropped={(taskListId: number, cardId: number, draggedTotaskListId: number, droppingIndex: number) => this.onTaskCardDropped(taskListId, cardId, draggedTotaskListId, droppingIndex)}
                                 />
                             </div>
                         ))

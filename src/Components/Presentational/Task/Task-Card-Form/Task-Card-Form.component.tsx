@@ -5,17 +5,23 @@ import Button from '../../../Shared/Form-Elements/Button/Button.component';
 
 interface ITaskCardFormProps {
     taskCardCreated(name: string): any;
+    cardName?: string;
+    taskCardUpdated(name: string): any;
 }
 
 const TaskCardForm: React.FC<ITaskCardFormProps> = (props: ITaskCardFormProps) => {
 
-    const [cardName, setCardName] = useState('');
+    const [cardName, setCardName] = useState(props.cardName || '');
 
     const inputChangedHandler = (e: any) => {
         setCardName(e.target.value);
     }
 
     const saveCardName = (e: any) => {
+        if(props.cardName) {
+            props.taskCardUpdated && props.taskCardUpdated(cardName);
+            return;
+        }
         props.taskCardCreated && props.taskCardCreated(cardName);
     }
 
@@ -27,7 +33,7 @@ const TaskCardForm: React.FC<ITaskCardFormProps> = (props: ITaskCardFormProps) =
                         <div className="col-lg-3 col-md-3 col-12"></div>
                         <div className="col-lg-6 col-md-6 col-12">
                             <Input
-                                type="text"
+                                type="textarea"
                                 placeholder="Enter list name"
                                 value={cardName}
                                 changed={(event) => inputChangedHandler(event)}
@@ -44,7 +50,7 @@ const TaskCardForm: React.FC<ITaskCardFormProps> = (props: ITaskCardFormProps) =
                                     type="submit"
                                     clicked={(event) => saveCardName(event)}
                                     disabled={!cardName}
-                                >Save Card</Button>
+                                >{props.cardName ? 'Update Card' : 'Save Card'}</Button>
                             </h6>
                         </div>
                     </div>

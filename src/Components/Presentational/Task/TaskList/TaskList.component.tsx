@@ -5,15 +5,18 @@ import Button from '../../../Shared/Form-Elements/Button/Button.component';
 import AppModal from '../../../Shared/Modal/Modal.component';
 import TaskCardForm from '../Task-Card-Form/Task-Card-Form.component';
 import RemoveIcon from '../../../Shared/Remove-Icon/Remove-Icon.component';
+import EditIcon from '../../../Shared/Edit-Icon/Edit-Icon.component';
+import * as Utility from '../../../Shared/Utility/utility';
 
 interface ITaskListProps {
     taskListId: number;
     name: string;
     taskCard: any;
     taskCardCreated(taskListId: number, cardName: string): any
-    onTaskCardDropped(draggedFromtaskListId: number, cardId: number, draggedToTaskListId: number): any;
+    onTaskCardDropped(draggedFromtaskListId: number, cardId: number, draggedToTaskListId: number, droppingIndex: number): any;
     removeTask(taskListId: number): any;
     removeTaskCard(taskListId: number, cardId: number): any;
+    taskCardUpdated(taskId: number, cardId: number, cardName: string): any;
 }
 
 const TaskList: React.FC<ITaskListProps> = (props) => {
@@ -22,9 +25,13 @@ const TaskList: React.FC<ITaskListProps> = (props) => {
     const [showConfirmation, setShowConfirmation] = useState(false);
     const [taskListIdToBeRemoved, setTaskListIdToBeRemoved] = useState(0);
     const [cardIdToBeRemoved, setCardIdToBeRemoved] = useState(0);
+    const [cardName, setCardName] = useState('');
+    const [modalTitle, setModalTitle] = useState('Create Card')
 
     const addTaskCard = (e: any) => {
-        setEnableCardAdd(true)
+        setEnableCardAdd(true);
+        setCardName('');
+        setModalTitle('Create Card');
     }
 
     const taskCardCreated = (cardName: string, taskListId: number) => {
@@ -43,7 +50,9 @@ const TaskList: React.FC<ITaskListProps> = (props) => {
         props.onTaskCardDropped && props.onTaskCardDropped(
             Number(dataTransferObj.getData('taskListId')),
             Number(dataTransferObj.getData('cardId')),
-            draggedTotaskListId);
+            draggedTotaskListId,
+            Number(e.target.id)
+        );
     }
 
     const taskCardDragOver = (e: any) => {
@@ -80,6 +89,21 @@ const TaskList: React.FC<ITaskListProps> = (props) => {
         setShowConfirmation(false);
     }
 
+    const editCard = (taskId: number, cardId: number) => {
+        const tasks = Utility.getTasks();
+        const task = tasks.find( (task: any) => task.id === taskId);
+        const card = task && task.taskCard.find( (card: any) => card.id === cardId);
+        setCardName(card.name);
+        setEnableCardAdd(true);
+        setCardIdToBeRemoved(cardId);
+        setModalTitle('Update Card');
+    }
+
+    const taskCardUpdated = (cardName: string, taskId: number) => {
+        props.taskCardUpdated && props.taskCardUpdated(taskId, cardIdToBeRemoved, cardName);
+        setEnableCardAdd(false);
+    }
+
     return (
         <React.Fragment>
             <div className="task-list" onDrop={(event) => onTaskDrop(event, props.taskListId)} onDragOver={(event) => taskCardDragOver(event)}>
@@ -93,11 +117,12 @@ const TaskList: React.FC<ITaskListProps> = (props) => {
                             draggable="true" onDragStart={(event) => taskCardDragStart(event, props.taskListId, card.id)}
                         >
                             <div className="col-12">
-                                <div className="task-card">
+                                <div className="task-card" id={card.id}>
                                     <div>
                                         <RemoveIcon remove={() => removeTaskCard(props.taskListId, card.id)} title="Remove this task card"/>
+                                        <EditIcon edit={() => editCard(props.taskListId, card.id)} title="Edit card details"/>
                                     </div>
-                                    <p>{card.name}</p>
+                                    <p id={card.id}>{card.name}</p>
                                 </div>
                             </div>
                         </div>
@@ -113,9 +138,11 @@ const TaskList: React.FC<ITaskListProps> = (props) => {
             </div>
             {
                 enableCardAdd &&
-                <AppModal title="Create Card" width="40%" close={() => appModalClose()}>
+                <AppModal title={modalTitle} width="40%" close={() => appModalClose()}>
                     <TaskCardForm
                         taskCardCreated={(cardName) => taskCardCreated(cardName, props.taskListId)}
+                        taskCardUpdated={(cardName) => taskCardUpdated(cardName, props.taskListId)}
+                        cardName={cardName}
                     />
                 </AppModal>
             }
